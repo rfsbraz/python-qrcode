@@ -21,9 +21,9 @@ def long_description():
 
 # Colorama is needed for proper terminal support on MS platforms
 if sys.platform.startswith(('win', 'cygwin')):
-    dependencies = ['six', 'colorama']
+    dependencies = ['six', 'webcolors', 'colorama']
 else:
-    dependencies = ['six']
+    dependencies = ['six', 'webcolors']
 
 setup(
     name='qrcode',
