@@ -10,13 +10,39 @@ class BaseImage(object):
         self.width = width
         self.box_size = box_size
         self.pixel_size = (self.width + self.border*2) * self.box_size
+        self.escavate = False
         self._img = self.new_image(**kwargs)
 
-    def drawrect(self, row, col):
+    def draw(self, row, col, style='square'):
         """
-        Draw a single rectangle of the QR code.
+        Draw a pixel box of the QRCode, using the according style.
         """
-        raise NotImplementedError("BaseImage.drawrect")
+        raise NotImplementedError("BaseImage.draw")
+
+    def add_logo(self, logo):
+        self.logo = logo
+
+    def set_escavate(self, escavate):
+        self.escavate = escavate
+
+    def is_empty(self, row, col):
+        px = self.mask.load()
+        if (self._pixel_box_color(px, row, col) == self.back_color and  # Check self
+            self._pixel_box_color(px, row - 1, col) == self.back_color and  # Check top
+            self._pixel_box_color(px, row - 1, col - 1) == self.back_color and  # Check top left
+            self._pixel_box_color(px, row, col - 1) == self.back_color and  # Check left
+            self._pixel_box_color(px, row + 1, col - 1) == self.back_color and  # Check bottom left
+            self._pixel_box_color(px, row + 1, col) == self.back_color and  # Check bottom
+            self._pixel_box_color(px, row + 1, col + 1) == self.back_color and  # Check bottom right
+            self._pixel_box_color(px, row, col + 1) == self.back_color and  # Check right
+            self._pixel_box_color(px, row - 1, col + 1) == self.back_color  # Check top right
+            ):
+            return True
+        return False
+
+    def _pixel_box_color(self, matrix, row, col):
+        box = self.pixel_box(row, col)
+        return matrix[(box[0][0] + box[1][0]) / 2, (box[0][1] + box[1][1]) / 2]
 
     def save(self, stream, kind=None):
         """

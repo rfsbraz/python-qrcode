@@ -6,6 +6,7 @@ from pymaging.webcolors import Black, White
 from pymaging_png.png import PNG
 
 import qrcode.image.base
+from qrcode.image.base import Style
 
 
 class PymagingImage(qrcode.image.base.BaseImage):
@@ -29,7 +30,10 @@ class PymagingImage(qrcode.image.base.BaseImage):
     def new_image(self, **kwargs):
         return Image.new(RGB, self.pixel_size, self.pixel_size, White)
 
-    def drawrect(self, row, col):
+    def draw(self, row, col, style=Style.SQUARE):
+        self._drawrect(row, col)
+
+    def _drawrect(self, row, col):
         (x, y), (x2, y2) = self.pixel_box(row, col)
         for r in range(self.box_size):
             line_y = y + r

@@ -6,6 +6,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 import qrcode.image.base
+from qrcode.image import Style
 
 
 class SvgFragmentImage(qrcode.image.base.BaseImage):
@@ -25,7 +26,10 @@ class SvgFragmentImage(qrcode.image.base.BaseImage):
         # Save the unit size, for example the default box_size of 10 is '1mm'.
         self.unit_size = self.units(self.box_size)
 
-    def drawrect(self, row, col):
+    def draw(self, row, col, style=Style.SQUARE):
+        self._drawrect(row, col)
+
+    def _drawrect(self, row, col):
         self._img.append(self._rect(row, col))
 
     def units(self, pixels, text=True):

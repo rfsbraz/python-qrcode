@@ -3,6 +3,7 @@ from qrcode.image.base import BaseImage
 
 import six
 from bisect import bisect_left
+from qrcode.image import Style
 
 
 def make(data=None, **kwargs):
@@ -25,10 +26,18 @@ def _check_box_size(size):
 
 class QRCode:
 
+    MODULE_PROBE = -2
+    MODULE_DATA = -1
+    MODULE_EMPTY = 0
+
     def __init__(self, version=None,
                  error_correction=constants.ERROR_CORRECT_M,
-                 box_size=10, border=4,
-                 image_factory=None):
+                 box_size=60, border=4,
+                 image_factory=None,
+                 logo=None,
+                 escavate_logo=False,
+                 probe_style=Style.SQUARE,
+                 module_style=Style.SQUARE):
         _check_box_size(box_size)
         self.version = version and int(version)
         self.error_correction = int(error_correction)
@@ -39,6 +48,10 @@ class QRCode:
         self.image_factory = image_factory
         if image_factory is not None:
             assert issubclass(image_factory, BaseImage)
+        self.logo = logo
+        self.escavate_logo = escavate_logo
+        self.probe_style = probe_style
+        self.module_style = module_style
         self.clear()
 
     def clear(self):
@@ -119,9 +132,9 @@ class QRCode:
                 if (0 <= r and r <= 6 and (c == 0 or c == 6)
                         or (0 <= c and c <= 6 and (r == 0 or r == 6))
                         or (2 <= r and r <= 4 and 2 <= c and c <= 4)):
-                    self.modules[row + r][col + c] = True
+                    self.modules[row + r][col + c] = QRCode.MODULE_PROBE
                 else:
-                    self.modules[row + r][col + c] = False
+                    self.modules[row + r][col + c] = QRCode.MODULE_EMPTY
 
     def best_fit(self, start=None):
         """
@@ -273,10 +286,21 @@ class QRCode:
 
         im = image_factory(
             self.border, self.modules_count, self.box_size, **kwargs)
+
+        im.set_escavate(self.escavate_logo)
+        if self.escavate_logo:
+            im.set_mask(self.logo)
+
         for r in range(self.modules_count):
             for c in range(self.modules_count):
-                if self.modules[r][c]:
-                    im.drawrect(r, c)
+                if self.modules[r][c] == QRCode.MODULE_PROBE:
+                    im.draw(r, c, style=self.probe_style)
+                elif self.modules[r][c]:
+                    im.draw(r, c, style=self.module_style)
+
+        if self.logo:
+            im.add_logo(self.logo)
+
         return im
 
     def setup_timing_pattern(self):
@@ -309,9 +333,9 @@ class QRCode:
 
                         if (r == -2 or r == 2 or c == -2 or c == 2 or
                                 (r == 0 and c == 0)):
-                            self.modules[row + r][col + c] = True
+                            self.modules[row + r][col + c] = QRCode.MODULE_DATA
                         else:
-                            self.modules[row + r][col + c] = False
+                            self.modules[row + r][col + c] = QRCode.MODULE_EMPTY
 
     def setup_type_number(self, test):
         bits = util.BCH_type_number(self.version)
