@@ -79,7 +79,9 @@ class PilImage(qrcode.image.base.BaseImage):
             format = kwargs.get("kind", self.kind)
         if "kind" in kwargs:
             del kwargs["kind"]
-        self._img = self._img.resize((600, 600), Image.ANTIALIAS)
+        if 'size' in kwargs:
+            size = int(kwargs.get('size'))
+            self._img = self._img.resize((size, size), Image.ANTIALIAS)
         self._img.save(stream, format=format, **kwargs)
 
     def __getattr__(self, name):
