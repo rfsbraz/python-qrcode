@@ -38,7 +38,10 @@ class PilImage(qrcode.image.base.BaseImage):
 
         img = Image.new(mode, (self.pixel_size, self.pixel_size), back_color)
         self.fill_color = fill_color
-        self.back_color = webcolors.name_to_rgb(back_color)
+        try:
+            self.back_color = webcolors.name_to_rgb(back_color)
+        except:
+            self.back_color = back_color
         self._idr = ImageDraw.Draw(img)
         return img
 

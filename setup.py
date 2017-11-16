@@ -27,7 +27,7 @@ else:
 
 setup(
     name='qrcode',
-    version='5.3.post',
+    version='5.3.1post',
     url='https://github.com/lincolnloop/python-qrcode',
     description='QR Code image generator',
     license='BSD',
